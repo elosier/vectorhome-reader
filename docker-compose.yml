@@ -1,0 +1,35 @@
+# Runs the reader together with FlareSolverr, so feeds behind a Cloudflare
+# browser challenge can be fetched (enable "Fetch via Cloudflare challenge
+# solver" per-feed in Settings → Edit).
+#
+#   docker compose up -d
+#
+services:
+  reader:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - REFRESH_MINUTES=30
+      - READER_DB=/app/data/reader.db
+      # Point the reader at the solver service below:
+      - SOLVER_URL=http://flaresolverr:8191/v1
+    volumes:
+      - reader-data:/app/data
+    depends_on:
+      - flaresolverr
+    restart: unless-stopped
+
+  flaresolverr:
+    image: ghcr.io/flaresolverr/flaresolverr:latest
+    environment:
+      - LOG_LEVEL=info
+      - TZ=UTC
+    # Expose 8191 only if you want to reach the solver directly for debugging.
+    # ports:
+    #   - "8191:8191"
+    restart: unless-stopped
+
+volumes:
+  reader-data:

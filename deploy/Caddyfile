@@ -1,0 +1,41 @@
+# HTTPS for the reader on a non-standard port (the ISP blocks 80/443).
+# The cert is obtained out-of-band by acme.sh via DNS-01 (DuckDNS), so no
+# inbound 80/443 is needed. Caddy just terminates TLS and reverse-proxies.
+#
+# Access:  https://example.duckdns.org:8443
+#
+# NOTE: the app now serves its own login page + session cookies (with optional
+# TOTP 2FA), so Caddy no longer does basic_auth. Just keep TLS + the proxy.
+#
+{
+    # Only TCP 8443 is port-forwarded, so disable HTTP/3 (QUIC needs UDP 8443).
+    # Without this, browsers try QUIC, can't reach UDP, and stall on load.
+    # Remove this block if you also forward UDP 8443.
+    servers {
+        protocols h1 h2
+    }
+}
+
+example.duckdns.org:8443 {
+    tls /etc/caddy/certs/example.duckdns.org.cer /etc/caddy/certs/example.duckdns.org.key
+
+    encode gzip
+
+    # Photo-sync receiver under /photos -> uvicorn on 127.0.0.1:8080 (prefix
+    # stripped). It authenticates with its own Bearer token, so no auth here.
+    # Caddy streams request bodies with no size cap by default, so nginx-style
+    # client_max_body_size / proxy_request_buffering tweaks aren't needed;
+    # flush_interval -1 streams large up/downloads instead of buffering.
+    handle_path /photos/* {
+        reverse_proxy 127.0.0.1:8080 {
+            header_up X-Forwarded-Prefix /photos
+            flush_interval -1
+        }
+    }
+
+    # Everything else -> the RSS reader. The app serves its own login page +
+    # session cookies (optional TOTP 2FA), so there is NO basicauth here.
+    handle {
+        reverse_proxy 127.0.0.1:3000
+    }
+}

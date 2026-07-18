@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vectorhome Reader</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <meta name="theme-color" content="#0B57D0" />
+  <!-- Apply saved theme before first paint to avoid a flash of the wrong theme. -->
+  <script>try{var t=localStorage.getItem('theme');if(t&&t!=='auto')document.documentElement.setAttribute('data-theme',t);}catch(e){}</script>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <div id="app">
+    <!-- Sidebar -->
+    <aside id="sidebar">
+      <header class="side-head">
+        <h1><svg class="brand-icon" viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="14" fill="#0B57D0"/><path d="M24,39 Q32,31 40,39" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round"/><path d="M19.5,36 Q32,23.5 44.5,36" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round"/><path d="M15,33 Q32,16 49,33" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round"/><circle cx="32" cy="44" r="4.5" fill="#fff"/></svg> <span data-i18n="brand">Reader</span></h1>
+        <div class="head-actions">
+          <button id="menu-btn" data-i18n-title="btn.settings" title="Settings &amp; subscriptions">☰</button>
+          <button id="health-btn" data-i18n-title="btn.health" data-i18n-aria="btn.health" title="Feed problems" hidden aria-label="Feed problems">▲</button>
+          <button id="theme-btn" data-i18n-title="btn.theme" title="Theme">🌓</button>
+          <button id="refresh-btn" data-i18n-title="btn.refresh" title="Refresh all feeds">⟳</button>
+        </div>
+      </header>
+
+      <div class="add-box">
+        <input id="add-url" type="text" data-i18n-ph="add.ph" placeholder="Paste a URL or feed…" />
+        <button id="add-btn" data-i18n="add.btn">Add</button>
+      </div>
+
+      <nav id="smart-views">
+        <a class="nav-item" data-view="starred" href="#">🔖 <span data-i18n="nav.readLater">Read Later</span> <span class="count" id="count-readlater"></span></a>
+      </nav>
+
+      <div class="tree-header">
+        <a class="nav-item" data-view="all" href="#">📚 <span data-i18n="nav.all">All</span> <span class="count" id="count-all"></span></a>
+        <button id="collapse-toggle" data-i18n-title="btn.collapseAll" title="Collapse all categories">⊟</button>
+      </div>
+
+      <div id="feed-tree"></div>
+
+      <footer class="side-foot">
+        <label class="opml-btn"><span data-i18n="opml.import">Import OPML</span><input type="file" id="opml-file" accept=".opml,.xml" hidden /></label>
+        <a href="/api/opml/export" class="opml-btn" data-i18n="opml.export">Export OPML</a>
+      </footer>
+    </aside>
+
+    <!-- Article stream -->
+    <section id="stream-pane">
+      <header class="stream-head">
+        <div class="stream-head-left">
+          <button id="sidebar-toggle" data-i18n-title="btn.hideSidebar" title="Hide sidebar">⮜</button>
+          <h2 id="stream-title">All</h2>
+        </div>
+        <div class="stream-actions">
+          <input id="search-box" type="search" data-i18n-ph="search.ph" placeholder="Search articles…" />
+          <select id="filter-select" title="Filter">
+            <option value="unread" data-i18n="filter.unread">Unread</option>
+            <option value="all" data-i18n="filter.all">All</option>
+          </select>
+          <button id="reload-btn" data-i18n-title="btn.reload" title="Reload view (no fetch)">⟲</button>
+          <div class="dropdown">
+            <button id="mark-all-btn" data-i18n="btn.markReadMenu" data-i18n-title="btn.markReadTitle" title="Mark as read">✓ Mark read ▾</button>
+            <div class="dropdown-menu" id="mark-read-menu" hidden>
+              <button data-age="all" data-i18n="mark.all">All articles</button>
+              <button data-age="day" data-i18n="mark.day">Older than one day</button>
+              <button data-age="week" data-i18n="mark.week">Older than one week</button>
+            </div>
+          </div>
+        </div>
+      </header>
+      <div id="stream"></div>
+      <div id="edge-hint" aria-live="polite"></div>
+    </section>
+
+    <!-- Left-edge hover zone: reveals the sidebar while it's hidden (desktop) -->
+    <div id="edge-hover"></div>
+
+    <!-- Mobile: scrim behind the category drawer -->
+    <div id="drawer-backdrop"></div>
+
+    <!-- Mobile: bottom bar shown on the list view -->
+    <nav id="mobile-bar">
+      <button id="mb-cats" data-i18n-title="btn.cats" data-i18n-aria="btn.catsAria" title="Categories" aria-label="Open categories">☰</button>
+      <button id="mb-top" data-i18n-title="btn.top" data-i18n-aria="btn.top" title="Scroll to top" aria-label="Scroll to top">↑</button>
+    </nav>
+
+    <!-- Mobile: single full-article view (swipe left/right to navigate) -->
+    <section id="article-view">
+      <header class="av-bar">
+        <button id="av-back" data-i18n="btn.back" data-i18n-aria="btn.backAria" aria-label="Back to list">‹ Back</button>
+        <span id="av-feed" class="av-feed"></span>
+      </header>
+      <div class="av-body"></div>
+    </section>
+  </div>
+
+  <div id="toast"></div>
+  <script src="/vendor/qrcode.js" defer></script>
+  <script src="/app.js" type="module"></script>
+</body>
+</html>

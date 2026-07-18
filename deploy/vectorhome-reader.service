@@ -1,0 +1,36 @@
+# systemd unit for running the reader on a VPS.
+# Install:  sudo cp deploy/vectorhome-reader.service /etc/systemd/system/
+#           sudo systemctl daemon-reload && sudo systemctl enable --now vectorhome-reader
+[Unit]
+Description=Vectorhome RSS Reader
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+# Adjust User and WorkingDirectory to where you cloned the app.
+User=www-data
+WorkingDirectory=/opt/vectorhome-reader
+Environment=PORT=3000
+Environment=REFRESH_MINUTES=30
+# Bind to localhost so the app is only reachable via the TLS reverse proxy.
+Environment=HOST=127.0.0.1
+# Keep the SQLite DB on a stable path.
+Environment=READER_DB=/opt/vectorhome-reader/data/reader.db
+# Nightly gzipped DB snapshots (7 weekday slots + 1 monthly) for offsite backup;
+# an rclone cron copies this directory to Backblaze B2. Unset to disable.
+Environment=READER_BACKUP_DIR=/data/backups/reader
+# Authentication: the app serves its own login page + session cookies (no more
+# Caddy basic_auth). On FIRST run it bootstraps the credential from these vars
+# (stored hashed in the DB); afterwards change password / enable 2FA in Settings.
+# Once set, READER_PASSWORD may be removed (the hash lives in the DB).
+Environment=READER_USERNAME=admin
+Environment=READER_PASSWORD=CHANGE_ME_ON_FIRST_RUN
+# Optional: a FlareSolverr endpoint for Cloudflare-protected feeds.
+# Environment=SOLVER_URL=http://localhost:8191/v1
+ExecStart=/usr/bin/node --disable-warning=ExperimentalWarning server.js
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

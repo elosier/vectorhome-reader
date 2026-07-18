@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vectorhome Reader — Sign in</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <meta name="theme-color" content="#0B57D0" />
+  <script>try{var t=localStorage.getItem('theme');if(t&&t!=='auto')document.documentElement.setAttribute('data-theme',t);}catch(e){}</script>
+  <style>
+    :root { --bg:#f6f8fc; --panel:#fff; --text:#1f1f1f; --muted:#5f6368; --border:#dadce0; --accent:#0b57d0; --on-accent:#fff; --err:#d93025; }
+    :root[data-theme="dark"], html[data-theme="dark"] { --bg:#1b1b1f; --panel:#26262b; --text:#e3e3e6; --muted:#9aa0a6; --border:#3c3c43; --accent:#a8c7fa; --on-accent:#062e6f; --err:#f2b8b5; }
+    @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg:#1b1b1f; --panel:#26262b; --text:#e3e3e6; --muted:#9aa0a6; --border:#3c3c43; --accent:#a8c7fa; --on-accent:#062e6f; --err:#f2b8b5; } }
+    * { box-sizing: border-box; }
+    body { margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center; background:var(--bg); color:var(--text); font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif; }
+    .card { background:var(--panel); border:1px solid var(--border); border-radius:16px; padding:32px 28px; width:340px; max-width:92vw; box-shadow:0 1px 3px rgba(0,0,0,.1); }
+    .brand { display:flex; align-items:center; gap:10px; font-size:20px; font-weight:700; margin-bottom:22px; }
+    .brand svg { width:34px; height:34px; }
+    label { display:block; font-size:13px; color:var(--muted); margin:14px 0 4px; }
+    input { width:100%; padding:10px 12px; border:1px solid var(--border); border-radius:8px; background:var(--bg); color:var(--text); font-size:15px; }
+    input:focus { outline:none; border-color:var(--accent); box-shadow:inset 0 0 0 1px var(--accent); }
+    button { width:100%; margin-top:20px; padding:11px; border:none; border-radius:24px; background:var(--accent); color:var(--on-accent); font-size:15px; font-weight:600; cursor:pointer; }
+    button:disabled { opacity:.6; cursor:default; }
+    .err { color:var(--err); font-size:13px; margin-top:14px; min-height:18px; }
+    .hint { font-size:12px; color:var(--muted); margin-top:6px; }
+    .check { display:flex; align-items:flex-start; gap:8px; font-size:13px; color:var(--text); margin-top:12px; cursor:pointer; }
+    .check input { width:auto; margin-top:2px; }
+    .hidden { display:none; }
+  </style>
+</head>
+<body>
+  <form class="card" id="login-form" autocomplete="on">
+    <div class="brand">
+      <svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="14" fill="#0B57D0"/><path d="M24,39 Q32,31 40,39" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round"/><path d="M19.5,36 Q32,23.5 44.5,36" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round"/><path d="M15,33 Q32,16 49,33" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round"/><circle cx="32" cy="44" r="4.5" fill="#fff"/></svg>
+      <span id="t-title">Sign in</span>
+    </div>
+    <label id="t-user-l" for="username">Username</label>
+    <input id="username" name="username" type="text" autocomplete="username" autofocus />
+    <label id="t-pass-l" for="password">Password</label>
+    <input id="password" name="password" type="password" autocomplete="current-password" />
+    <div id="code-row" class="hidden">
+      <label id="t-code-l" for="totp">Authentication code</label>
+      <input id="totp" name="totp" type="text" inputmode="numeric" autocomplete="one-time-code" placeholder="123456"
+             pattern="[0-9A-Za-z-]*" aria-label="One-time authentication code" maxlength="14" />
+      <div class="hint" id="t-code-hint">Enter the 6-digit code from your authenticator app, or a recovery code.</div>
+      <label class="check"><input type="checkbox" id="remember" /> <span id="t-remember">Don’t ask for a code on this browser for 60 days</span></label>
+    </div>
+    <button id="submit" type="submit">Sign in</button>
+    <div class="err" id="err"></div>
+  </form>
+  <script>
+    const lang = (function(){ try { var l = localStorage.getItem('lang'); return l === 'fr' ? 'fr' : 'en'; } catch(e){ return 'en'; } })();
+    const T = {
+      en: { title:'Sign in', user:'Username', pass:'Password', code:'Authentication code',
+            codeHint:'Enter the 6-digit code from your authenticator app, or a recovery code.',
+            remember:'Don’t ask for a code on this browser for 60 days',
+            submit:'Sign in', bad:'Incorrect username or password.', badcode:'Invalid authentication code.',
+            notcfg:'Login is not configured on the server yet.', neterr:'Could not reach the server. Try again.' },
+      fr: { title:'Connexion', user:'Nom d’utilisateur', pass:'Mot de passe', code:'Code d’authentification',
+            codeHint:'Entrez le code à 6 chiffres de votre application d’authentification, ou un code de récupération.',
+            remember:'Ne plus demander de code sur ce navigateur pendant 60 jours',
+            submit:'Se connecter', bad:'Nom d’utilisateur ou mot de passe incorrect.', badcode:'Code d’authentification invalide.',
+            notcfg:'La connexion n’est pas encore configurée sur le serveur.', neterr:'Impossible de joindre le serveur. Réessayez.' },
+    }[lang];
+    document.documentElement.lang = lang === 'fr' ? 'fr-CA' : 'en-CA';
+    document.getElementById('t-title').textContent = T.title;
+    document.getElementById('t-user-l').textContent = T.user;
+    document.getElementById('t-pass-l').textContent = T.pass;
+    document.getElementById('t-code-l').textContent = T.code;
+    document.getElementById('t-code-hint').textContent = T.codeHint;
+    document.getElementById('t-remember').textContent = T.remember;
+    document.getElementById('submit').textContent = T.title;
+
+    const form = document.getElementById('login-form');
+    const errEl = document.getElementById('err');
+    const codeRow = document.getElementById('code-row');
+    const btn = document.getElementById('submit');
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      errEl.textContent = '';
+      btn.disabled = true;
+      const body = {
+        username: document.getElementById('username').value,
+        password: document.getElementById('password').value,
+        code: document.getElementById('totp').value || undefined,
+        remember: document.getElementById('remember').checked,
+      };
+      try {
+        const r = await fetch('/api/login', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
+        const data = await r.json().catch(() => ({}));
+        if (r.ok && data.ok) { window.location.href = '/'; return; }
+        if (data.totp_required) {
+          codeRow.classList.remove('hidden');
+          document.getElementById('totp').focus();
+          errEl.textContent = data.error === 'bad_code' ? T.badcode : '';
+        } else if (data.error === 'not_configured') {
+          errEl.textContent = T.notcfg;
+        } else {
+          errEl.textContent = T.bad;
+        }
+      } catch (_) {
+        errEl.textContent = T.neterr;
+      } finally {
+        btn.disabled = false;
+      }
+    });
+
+    // Show the TOTP field up front when 2FA is enabled, so a password manager
+    // (e.g. Bitwarden) autofills username + password + code in a single pass —
+    // an autofill won't touch a display:none field that only appears after submit.
+    fetch('/api/auth/required').then((r) => r.json()).then((d) => {
+      if (d && d.totp) codeRow.classList.remove('hidden');
+    }).catch(() => {});
+  </script>
+</body>
+</html>

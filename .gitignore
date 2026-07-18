@@ -1,0 +1,9 @@
+node_modules/
+data/
+*.db
+*.db.gz
+*.log
+.env
+.DS_Store
+# Personal ops journal — deployment specifics stay out of the public repo.
+HANDOFF.md
