@@ -168,3 +168,40 @@ lib/opml.js        OPML import/export
 public/            Frontend SPA (index.html, app.js, style.css)
 data/reader.db     SQLite database (created on first run)
 ```
+
+## Development
+
+This app was built by a human and an AI assistant (Claude, via Claude Code)
+working together in conversation. The split of responsibilities was roughly:
+
+**The human collaborator:**
+- **Set the goals and constraints** — what to build and the rules it had to live
+  within: self-hosted single-user, zero external services, runs on a home VPS
+  behind an ISP that blocks ports 80/443, colorblind-safe status indicators,
+  bilingual (English / French-Canadian), Backblaze B2 for backups, and so on.
+- **Drove the product** — requested each feature, prioritized, chose between
+  design options the AI offered, and decided the trade-offs (e.g. how aggressive
+  the SSRF protection should be, whether 2FA is opt-in).
+- **Tested in the real world** — used the app daily on desktop and mobile and
+  reported the bugs that mattered: newsletters scraped as link lists instead of
+  articles, images loading too slowly, an intermittent login hang, mobile layout
+  issues, TOTP autofill not working in the browser's password manager. Much of
+  the polish came from this feedback loop.
+- **Operated anything privileged** — ran all commands touching real credentials
+  or infrastructure: rotating passwords/tokens, the router port-forward, DNS,
+  creating the GitHub repo and its deploy key, and confirming service restarts.
+
+**The AI assistant:**
+- **Wrote all the code, tests, and documentation** — architecture and every line,
+  from the SQLite schema to the service worker to this README.
+- **Made the engineering decisions** — library choices, data model, the auth
+  design (scrypt + signed sessions + RFC-6238 TOTP), the security hardening.
+- **Debugged and verified** — reproduced issues, ran syntax/integration/RFC
+  test-vector checks, and audited the codebase for vulnerabilities.
+- **Handled deployment mechanics** — systemd unit, cron, Caddy reverse-proxy
+  config, the backup pipeline, and preparing this repo for publication.
+
+In short: **the human decided *what* and *why* and confirmed it worked in
+practice; the AI decided *how* and did the building.** The automated test suite
+(`npm test`) exists partly so that this collaboration stays verifiable rather
+than taken on faith.
