@@ -8,6 +8,14 @@ that have no RSS at all (via auto-discovery with a scraping fallback).
 Built to run on your own server/VPS with **zero external services**: a single Node
 process plus a SQLite file. No native build step (uses Node's built-in `node:sqlite`).
 
+> ### 🤖 Built entirely by AI
+> This project — all of the code, tests, and documentation — was written **end to
+> end by an AI coding assistant** (Anthropic's Claude, via Claude Code), working
+> from a human's plain-language feature requests. No line was hand-written by a
+> person. It's shared as a real-world example of what agentic AI development can
+> produce; review it with that context in mind before running it anywhere
+> sensitive.
+
 ## Features
 
 - **Add feeds by URL** — paste a feed URL *or* a normal site URL.
