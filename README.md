@@ -201,6 +201,23 @@ working together in conversation. The split of responsibilities was roughly:
 - **Handled deployment mechanics** — systemd unit, cron, Caddy reverse-proxy
   config, the backup pipeline, and preparing this repo for publication.
 
+**Models used.** The code was produced with Anthropic's Claude models through
+Claude Code, across several sessions. Exact per-line attribution isn't tracked,
+but the work split roughly this way:
+
+- **Claude Opus 4.8** — most of the application and the security-sensitive parts:
+  the authentication system (scrypt passwords, signed sessions, TOTP 2FA,
+  recovery codes, "remember this browser"), English / French-Canadian
+  internationalization, the outbound-fetch hardening (`lib/safefetch.js`) and the
+  HTML sanitizer, a security/bug audit, the mobile UI, and the harder debugging
+  (an intermittent HTTPS login hang, feed-scraping misclassification, a CDN `403`
+  fix). It also handled deployment and preparing this repository for release.
+- **Claude Fable 5** — a full design-and-vulnerability review, then the resulting
+  batch of larger features: pagination / infinite scroll, full-text search
+  (SQLite FTS5), the installable PWA (service worker + manifest), QR-code 2FA
+  enrollment, the nightly Backblaze B2 backup pipeline, and the automated test
+  suite (`npm test`).
+
 In short: **the human decided *what* and *why* and confirmed it worked in
 practice; the AI decided *how* and did the building.** The automated test suite
 (`npm test`) exists partly so that this collaboration stays verifiable rather
