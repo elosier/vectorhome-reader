@@ -712,7 +712,7 @@ function buildEdgeCard(icon, title, sub) {
   return el('div', { className: 'empty all-read' }, ...kids);
 }
 function buildAllReadCard(sub) {
-  const icon = el('img', { className: 'all-read-img', src: '/icons/all-read.svg', alt: '' });
+  const icon = el('img', { className: 'all-read-img', src: '/icons/all-read.png', alt: '' });
   return buildEdgeCard(icon, t('card.allRead'), sub);
 }
 
@@ -783,7 +783,7 @@ function buildArticle(it) {
 // Lead images (the original page's og:image) for imageless articles are fetched
 // as they near the viewport, and we preload a few articles ahead so they're
 // ready before you scroll to them.
-const PRELOAD_AHEAD = 3;
+const PRELOAD_AHEAD = 5;
 let imgObserver = null;
 function observeImages() {
   if (typeof IntersectionObserver === 'undefined') return;

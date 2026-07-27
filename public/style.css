@@ -164,7 +164,7 @@ nav#smart-views { padding: 8px 8px 4px; border-bottom: 1px solid var(--border); 
 .empty { padding: 60px 20px; text-align: center; color: var(--muted); }
 .all-read { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; min-height: 60vh; }
 .all-read-emoji { font-size: 44px; line-height: 1; }
-.all-read-img { width: 50vmin; height: 50vmin; max-width: 100%; border-radius: 6%; }
+.all-read-img { width: 50vmin; height: 50vmin; max-width: 100%; }
 .all-read-title { font-size: 20px; font-weight: 700; color: var(--text); }
 .all-read-sub { font-size: 13px; color: var(--muted); max-width: 240px; }
 
