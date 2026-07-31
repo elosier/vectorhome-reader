@@ -1,6 +1,6 @@
 // Vectorhome Reader service worker: app-shell caching + limited API fallback.
 // Bump CACHE_VERSION whenever a shell file changes so clients pick it up.
-const CACHE_VERSION = 'v3'; // v3: never handle the /admin console (separate app); v2: PNG launcher icons
+const CACHE_VERSION = 'v4'; // v4: auto-refresh pin-to-top fix
 const SHELL_CACHE = `shell-${CACHE_VERSION}`;
 const API_CACHE = `api-${CACHE_VERSION}`;
 const SHELL = ['/', '/app.js', '/style.css', '/favicon.svg', '/icons/all-read.png', '/vendor/qrcode.js', '/manifest.webmanifest'];

@@ -1073,18 +1073,39 @@ async function refreshStream() {
   // Keep articles already shown (even if since read) so j/k navigation still works.
   state.items = [...fresh, ...state.items];
   if (wasAtTop) {
-    // At the top: surface the new articles and stay at the top.
-    stream.scrollTop = 0;
+    // At the top: surface the new articles and *stay pinned* to the top. A plain
+    // scrollTop=0 isn't enough — the new cards load their lead images a moment
+    // later, and that reflow otherwise leaves the view a few px below the top.
     if (!mobile) {
       const nf = stream.querySelector(cardSel);
       if (nf) setFocus(Number(nf.dataset.id));
     }
+    pinStreamTop(stream);
   } else if (firstCard) {
     // Mid-read: keep the current position steady as content is added above.
     stream.scrollTop = before + (firstCard.getBoundingClientRect().top - anchorTop);
   }
   if (!mobile) observeImages();
-  setTimeout(() => { suppressScrollRead = false; }, 250);
+  setTimeout(() => { suppressScrollRead = false; }, 500);
+}
+
+// Hold the stream at the very top for a short window so async lead-image reflow
+// in freshly-added cards can't drift the view down. Yields the instant the user
+// scrolls or interacts.
+function pinStreamTop(stream) {
+  stream.scrollTop = 0;
+  let cancelled = false;
+  const evs = ['wheel', 'touchmove', 'keydown', 'pointerdown'];
+  const cancel = () => { cancelled = true; evs.forEach((e) => window.removeEventListener(e, cancel, true)); };
+  evs.forEach((e) => window.addEventListener(e, cancel, true));
+  const end = performance.now() + 500;
+  const tick = () => {
+    if (cancelled) return;
+    if (stream.scrollTop !== 0) stream.scrollTop = 0;
+    if (performance.now() < end) requestAnimationFrame(tick);
+    else cancel();
+  };
+  requestAnimationFrame(tick);
 }
 
 let autoTimer = null;
