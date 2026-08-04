@@ -1,6 +1,6 @@
 // Vectorhome Reader service worker: app-shell caching + limited API fallback.
 // Bump CACHE_VERSION whenever a shell file changes so clients pick it up.
-const CACHE_VERSION = 'v4'; // v4: auto-refresh pin-to-top fix
+const CACHE_VERSION = 'v5'; // v5: also bypass /FoundryStatus; v4: auto-refresh pin-to-top fix
 const SHELL_CACHE = `shell-${CACHE_VERSION}`;
 const API_CACHE = `api-${CACHE_VERSION}`;
 const SHELL = ['/', '/app.js', '/style.css', '/favicon.svg', '/icons/all-read.png', '/vendor/qrcode.js', '/manifest.webmanifest'];
@@ -23,11 +23,13 @@ self.addEventListener('fetch', (e) => {
   const url = new URL(req.url);
   if (url.origin !== location.origin) return;
 
-  // The admin console (/admin/*) is a separate app on this origin. It manages its
-  // own freshness and must never be cached by the reader's worker — otherwise its
-  // /admin/api/* reads fall into the cache-first branch below and go stale. Bypass
-  // it entirely so its assets and API always hit the network.
+  // The admin console (/admin/*) and the public Foundry status page
+  // (/FoundryStatus*) are separate apps on this origin. They manage their own
+  // freshness and must never be cached by the reader's worker — otherwise their
+  // /api/* reads fall into the cache-first branch below and go stale. Bypass them
+  // entirely so their assets and API always hit the network.
   if (url.pathname === '/admin' || url.pathname.startsWith('/admin/')) return;
+  if (url.pathname === '/FoundryStatus' || url.pathname.startsWith('/FoundryStatus')) return;
 
   // Auth endpoints must always hit the network (session/login correctness).
   if (url.pathname.startsWith('/api/auth') || url.pathname === '/login') return;
