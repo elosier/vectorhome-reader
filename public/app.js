@@ -928,11 +928,44 @@ function setActive(id, { scroll = false } = {}) {
 }
 
 // Pin the focused article near the top of the stream (keyboard navigation).
+// A one-shot scroll isn't enough: content ABOVE the target (late-loading images
+// in a long article) keeps growing after we jump, pushing the target down without
+// firing a scroll event — the screen shows the previous article's tail while
+// focus already says "next". So hold the target at the top until the layout
+// settles; any user scrolling releases it immediately.
+let alignJob = null;
 function scrollActiveIntoView(id) {
   const stream = $('#stream');
   const node = stream && stream.querySelector(`.article[data-id="${id}"]`);
   if (!stream || !node) return;
-  stream.scrollTop += node.getBoundingClientRect().top - stream.getBoundingClientRect().top - 8;
+  if (alignJob) alignJob.cancel();
+  const align = () => {
+    const d = node.getBoundingClientRect().top - stream.getBoundingClientRect().top - 8;
+    if (Math.abs(d) > 1) stream.scrollTop += d;
+  };
+  align();
+  let done = false;
+  const onLoad = () => { if (!done) align(); };
+  const onKey = (e) => { if (!['j', 'k', 'm', 's'].includes(e.key)) cancel(); }; // scroll keys release
+  const evs = ['wheel', 'touchmove', 'pointerdown'];
+  const cancel = () => {
+    done = true;
+    evs.forEach((e) => window.removeEventListener(e, cancel, true));
+    window.removeEventListener('keydown', onKey, true);
+    stream.removeEventListener('load', onLoad, true);
+    if (alignJob && alignJob.cancel === cancel) alignJob = null;
+  };
+  evs.forEach((e) => window.addEventListener(e, cancel, true));
+  window.addEventListener('keydown', onKey, true);
+  stream.addEventListener('load', onLoad, true); // image 'load' doesn't bubble; capture catches it
+  const end = performance.now() + 2500;
+  const tick = () => {
+    if (done) return;
+    align();
+    if (performance.now() < end) requestAnimationFrame(tick); else cancel();
+  };
+  requestAnimationFrame(tick);
+  alignJob = { cancel };
 }
 
 // Read model: mark an article read only once it has been scrolled fully ABOVE
