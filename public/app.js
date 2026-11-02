@@ -1339,10 +1339,14 @@ function feedStatus(f) {
   const age = newest ? Date.now() - newest : Infinity;
   const months = Number(state.settings.inactive_months) || 9;
   const cutoffMs = months * 30.44 * 864e5; // average days per month
-  // A last-fetch error on a feed that's still delivering fresh content (within
-  // ~2 days) is almost always transient — e.g. Reddit rate-limiting (429/403) —
-  // so don't flag it unreachable. Only feeds erroring AND going stale qualify.
-  if (f.last_error && age > 2 * 864e5) return { key: 'unreachable', label: t('status.unreachable') };
+  // Only flag Unreachable after several CONSECUTIVE failed refreshes (~1.5 h at
+  // the 30-min interval): one slow/timed-out fetch from a flaky server shouldn't
+  // flip the status. Also skip it while the feed still delivers fresh content
+  // (within ~2 days) — e.g. Reddit rate-limiting (429/403) is transient.
+  const FAIL_THRESHOLD = 3;
+  if (f.last_error && (f.fail_count ?? FAIL_THRESHOLD) >= FAIL_THRESHOLD && age > 2 * 864e5) {
+    return { key: 'unreachable', label: t('status.unreachable') };
+  }
   if (age > cutoffMs) {
     if (!newest) return { key: 'inactive', label: t('status.inactiveNoItems') };
     const since = new Date(newest).toLocaleDateString(curLocale(), { year: 'numeric', month: 'short', day: 'numeric' });

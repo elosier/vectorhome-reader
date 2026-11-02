@@ -84,6 +84,13 @@ if (!feedCols.includes('source_newest')) {
   db.exec(`UPDATE feeds SET source_newest =
     (SELECT MAX(COALESCE(i.published_at, i.fetched_at)) FROM items i WHERE i.feed_id = feeds.id)`);
 }
+if (!feedCols.includes('fail_count')) {
+  // Consecutive failed refreshes (reset to 0 on success). A feed is only shown
+  // as Unreachable after several in a row, so one slow/timed-out fetch from a
+  // flaky server doesn't flip its status.
+  db.exec('ALTER TABLE feeds ADD COLUMN fail_count INTEGER NOT NULL DEFAULT 0');
+  db.exec('UPDATE feeds SET fail_count = 1 WHERE last_error IS NOT NULL');
+}
 const itemCols = db.prepare('PRAGMA table_info(items)').all().map((c) => c.name);
 if (!itemCols.includes('image_url')) {
   // NULL = not looked up yet, '' = looked up, none found, otherwise the image URL.

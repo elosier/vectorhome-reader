@@ -1,6 +1,6 @@
 // Vectorhome Reader service worker: app-shell caching + limited API fallback.
 // Bump CACHE_VERSION whenever a shell file changes so clients pick it up.
-const CACHE_VERSION = 'v6'; // v6: j/k keeps the target pinned while images load; v5: bypass /FoundryStatus
+const CACHE_VERSION = 'v7'; // v7: Unreachable needs 3 consecutive failures; v6: j/k pin
 const SHELL_CACHE = `shell-${CACHE_VERSION}`;
 const API_CACHE = `api-${CACHE_VERSION}`;
 const SHELL = ['/', '/app.js', '/style.css', '/favicon.svg', '/icons/all-read.png', '/vendor/qrcode.js', '/manifest.webmanifest'];

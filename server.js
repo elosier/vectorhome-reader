@@ -108,7 +108,7 @@ const wrap = (fn) => (req, res) => Promise.resolve(fn(req, res)).catch((e) => {
 app.get('/api/state', (req, res) => {
   const cats = db.prepare('SELECT id, name FROM categories ORDER BY name').all();
   const feeds = db.prepare(`
-    SELECT f.id, f.title, f.feed_url, f.site_url, f.category_id, f.kind, f.last_error, f.last_fetched,
+    SELECT f.id, f.title, f.feed_url, f.site_url, f.category_id, f.kind, f.last_error, f.last_fetched, f.fail_count,
            (SELECT COUNT(*) FROM items i WHERE i.feed_id = f.id AND i.is_read = 0) AS unread,
            COALESCE(f.source_newest,
              (SELECT MAX(COALESCE(i.published_at, i.fetched_at)) FROM items i WHERE i.feed_id = f.id)) AS newest
@@ -284,7 +284,7 @@ app.post('/api/feeds/bulk-delete', (req, res) => {
 app.get('/api/feeds/detail', (req, res) => {
   const feeds = db.prepare(`
     SELECT f.id, f.title, f.feed_url, f.site_url, f.kind, f.source_url, f.category_id, f.use_solver, f.scrape_mode,
-           c.name AS category, f.last_error, f.last_fetched,
+           c.name AS category, f.last_error, f.last_fetched, f.fail_count,
            (SELECT COUNT(*) FROM items i WHERE i.feed_id = f.id) AS total,
            (SELECT COUNT(*) FROM items i WHERE i.feed_id = f.id AND i.is_read = 0) AS unread,
            COALESCE(f.source_newest,
